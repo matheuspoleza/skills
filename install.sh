@@ -170,6 +170,9 @@ Invoke with /skill-name:
 **Validate**
 - `/review` — Two-phase validation (agentic QA → human eyes → PR description)
 
+**Debug**
+- `/debug` — Reproduce a bug, capture evidence to a cleared log, propose fix options, validate, add regression test
+
 **Primitives**
 - `/grill-me` — One-question-at-a-time interview with recommended answers
 - `/zoom-out` — Go up one abstraction layer, map siblings + callers

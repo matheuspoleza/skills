@@ -20,6 +20,7 @@ Primitives invokable anywhere: `/grill-me`, `/zoom-out`, `/handoff`, `/triage`, 
 | `/build` | Implement a milestone, supervised, BDD + TDD + end-to-end validation |
 | `/build-batch` | Implement a milestone autonomously inside a Conductor worktree, log-and-skip on scope creep |
 | `/review` | Two-phase validation — agentic QA, human-eyes pass, PR description |
+| `/debug` | Reproduce → propose fix options → validate against cleared log → regression test |
 | `/grill-me` | One-question-at-a-time interview with recommended answers |
 | `/zoom-out` | Go up one abstraction layer, map siblings + callers |
 | `/handoff` | Compact session into a cold-readable resume doc |
@@ -87,7 +88,7 @@ Installed into `.claude/rules/` and referenced from `CLAUDE.md`:
 
 ## Templates
 
-Document shapes the skills fill in. `prd.md`, `review.md`, `pr-description.md`, `manual-test.md`, `research.md`.
+Document shapes the skills fill in. `prd.md`, `review.md`, `pr-description.md`, `manual-test.md`, `research.md`, `bug.md`.
 
 ## Prompts
 
