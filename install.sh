@@ -1,7 +1,32 @@
 #!/usr/bin/env bash
 set -e
 
-SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_URL="https://github.com/matheuspoleza/skills.git"
+
+# Locate this script's directory. When piped via curl ($BASH_SOURCE is empty
+# or refers to a non-file like /dev/stdin), we self-bootstrap by cloning the
+# repo into a tempdir and re-execing from there.
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+  SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  SKILLS_DIR=""
+fi
+
+if [ -z "$SKILLS_DIR" ] || [ ! -d "$SKILLS_DIR/skills" ]; then
+  TARGET_INPUT="${1:-$PWD}"
+  if [ ! -d "$TARGET_INPUT" ]; then
+    echo "Error: target directory '$TARGET_INPUT' does not exist."
+    exit 1
+  fi
+  TARGET_ABS="$(cd "$TARGET_INPUT" && pwd)"
+  echo "Fetching skills toolkit from $REPO_URL..."
+  TMP_BOOT="$(mktemp -d)"
+  trap 'rm -rf "$TMP_BOOT"' EXIT
+  git clone --depth 1 --quiet "$REPO_URL" "$TMP_BOOT/skills"
+  bash "$TMP_BOOT/skills/install.sh" "$TARGET_ABS"
+  exit $?
+fi
+
 TARGET="${1:-.}"
 
 if [ ! -d "$TARGET" ]; then
@@ -131,6 +156,7 @@ Compiled docs are in `.app-catalog/docs/` and Gherkin scenarios in `.app-catalog
 Invoke with /skill-name:
 
 **Setup**
+- `/bootstrap` — Install or update this toolkit in the current project
 - `/onboard` — Map the codebase, take visual baselines
 
 **Discovery**

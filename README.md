@@ -25,18 +25,34 @@ Primitives invokable anywhere: `/grill-me`, `/zoom-out`, `/handoff`, `/triage`, 
 | `/handoff` | Compact session into a cold-readable resume doc |
 | `/triage` | Cut N candidates to M using RICE |
 | `/write-a-skill` | Author a new skill that conforms to the contract |
+| `/bootstrap` | Install or update this toolkit in the current project (curl one-liner under the hood) |
 
 ## Install
 
-```bash
-# Install into current project
-./install.sh
+From the target project, run:
 
-# Install into a specific project
-./install.sh /path/to/your/project
+```bash
+curl -fsSL https://raw.githubusercontent.com/matheuspoleza/skills/main/install.sh | bash
 ```
 
-Copies skills, rules, templates, and prompts into `.claude/` and creates/updates `CLAUDE.md`.
+To install into a different directory, pass it explicitly:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/matheuspoleza/skills/main/install.sh | bash -s -- /path/to/project
+```
+
+The installer clones this repo into a tempdir on the fly — requires `git` and `curl`.
+
+Once installed, re-run the same one-liner to update, or invoke `/bootstrap` from inside the project to do the same.
+
+### From a local clone
+
+```bash
+./install.sh                 # current directory
+./install.sh /path/to/proj   # specific project
+```
+
+Either path copies skills, rules, templates, and prompts into `.claude/` and creates/updates `CLAUDE.md`.
 
 ## Feature docs structure
 
