@@ -41,11 +41,13 @@ mkdir -p "$TARGET/.claude/rules"
 mkdir -p "$TARGET/.claude/templates"
 mkdir -p "$TARGET/.claude/prompts"
 
-# Skills — copy whole directory (SKILL.md plus any sibling .md files)
+# Skills — mirror whole directory (SKILL.md plus any sibling .md files).
+# Clear stale .md files first so removed siblings (e.g. an old schema.md) don't linger.
 for skill_dir in "$SKILLS_DIR/skills"/*/; do
   skill_name=$(basename "$skill_dir")
   dest="$TARGET/.claude/skills/$skill_name"
   mkdir -p "$dest"
+  rm -f "$dest"/*.md
   cp "$skill_dir"/*.md "$dest/"
   echo "  ✓ skill: $skill_name"
 done
@@ -136,20 +138,20 @@ fi
 
 # CLAUDE.md
 CLAUDE_FILE="$TARGET/CLAUDE.md"
-RULES=(tdd bdd visual-check agentation scope-first handoff escalation status-sync)
+RULES=(tdd bdd clean-code react visual-check agentation scope-first handoff escalation status-sync)
 
 if [ ! -f "$CLAUDE_FILE" ]; then
   cat > "$CLAUDE_FILE" <<'EOF'
 # Claude Instructions
 
-## Domain Context
+## Product Context
 
-If `.app-catalog/catalog.json` exists, read it at the start of every session.
-It is the shared domain vocabulary for this project — use its names for domains,
-resources, actors, views, and actions in all docs, code, and conversations.
-Do not invent new names for concepts already in the catalog.
+If `.app-catalog/README.md` exists, read it at the start of every session.
+It indexes the product's domains, actors, and features — use its names
+consistently in all docs, code, and conversations.
 
-Compiled docs are in `.app-catalog/docs/` and Gherkin scenarios in `.app-catalog/features/`.
+For feature work, also load the relevant `.app-catalog/features/{slug}.md`,
+which has the pages, flows, screenshots, and gotchas for that one feature.
 
 ## Skills
 
@@ -180,10 +182,16 @@ Invoke with /skill-name:
 - `/triage` — Cut N candidates to M using RICE
 - `/write-a-skill` — Author a new skill that conforms to the contract
 
+**Writing**
+- `/humanizer` — Strip AI-writing tells from text; auto-loads your `~/.claude/style-profile.md`
+- `/style-profile` — Learn your writing style into `~/.claude/style-profile.md`, which `/humanizer` auto-loads
+
 ## Rules
 
 @.claude/rules/tdd.md
 @.claude/rules/bdd.md
+@.claude/rules/clean-code.md
+@.claude/rules/react.md
 @.claude/rules/visual-check.md
 @.claude/rules/agentation.md
 @.claude/rules/scope-first.md
@@ -204,16 +212,25 @@ else
       echo "  ✓ CLAUDE.md appended rule: $rule"
     fi
   done
-  # Add domain context if missing
-  if ! grep -q "app-catalog/catalog.json" "$CLAUDE_FILE"; then
-    DOMAIN_BLOCK="## Domain Context
+  # Remove legacy "## Domain Context" block (refers to obsolete catalog.json)
+  if grep -q "^## Domain Context" "$CLAUDE_FILE"; then
+    awk '
+      /^## Domain Context/ { skip = 1; next }
+      skip && /^## / && !/^## Domain Context/ { skip = 0 }
+      !skip { print }
+    ' "$CLAUDE_FILE" > "$CLAUDE_FILE.tmp" && mv "$CLAUDE_FILE.tmp" "$CLAUDE_FILE"
+    echo "  ✗ CLAUDE.md removed legacy Domain Context block"
+  fi
+  # Add product context if missing
+  if ! grep -q "app-catalog/README.md" "$CLAUDE_FILE"; then
+    DOMAIN_BLOCK="## Product Context
 
-If \`.app-catalog/catalog.json\` exists, read it at the start of every session.
-It is the shared domain vocabulary for this project — use its names for domains,
-resources, actors, views, and actions in all docs, code, and conversations.
-Do not invent new names for concepts already in the catalog.
+If \`.app-catalog/README.md\` exists, read it at the start of every session.
+It indexes the product's domains, actors, and features — use its names
+consistently in all docs, code, and conversations.
 
-Compiled docs are in \`.app-catalog/docs/\` and Gherkin scenarios in \`.app-catalog/features/\`.
+For feature work, also load the relevant \`.app-catalog/features/{slug}.md\`,
+which has the pages, flows, screenshots, and gotchas for that one feature.
 
 "
     head -1 "$CLAUDE_FILE" > "$CLAUDE_FILE.tmp"
@@ -221,7 +238,7 @@ Compiled docs are in \`.app-catalog/docs/\` and Gherkin scenarios in \`.app-cata
     echo "$DOMAIN_BLOCK" >> "$CLAUDE_FILE.tmp"
     tail -n +2 "$CLAUDE_FILE" >> "$CLAUDE_FILE.tmp"
     mv "$CLAUDE_FILE.tmp" "$CLAUDE_FILE"
-    echo "  ✓ CLAUDE.md updated with domain context"
+    echo "  ✓ CLAUDE.md updated with product context"
   fi
 fi
 

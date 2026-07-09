@@ -24,7 +24,7 @@ Plus: `tmp/scope-skipped.md` with every out-of-scope item discovered during the 
 Same as `/build`:
 1. `docs/{feature}/prd.md` — scope and tech design
 2. `docs/{feature}/milestones/milestone-{n}.md` — task bullets in scope
-3. `.app-catalog/catalog.json` — domain vocabulary
+3. `.app-catalog/features/{feature}.md` — pages, flows, vocabulary, gotchas (and `.app-catalog/README.md` for the wider domain/actor map)
 
 If a task bullet is missing BDD criteria, **stop and ask** — this is the one allowed escalation pre-run.
 

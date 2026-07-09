@@ -24,24 +24,36 @@ Use `mcp__plugin_chrome-devtools-mcp_chrome-devtools__*` prefixed tools. Do not 
 
 ## Workflow
 
-1. **Ensure the dev server is running.**
-   Check: `lsof -i :3000` or `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000`.
-   If not running, start it in the background and wait for "Ready".
+1. **Ensure the dev server is running — on THIS worktree's port.**
+   Never assume a port. If the project ships a dev launcher (e.g. Cravou's
+   `scripts/dev.sh`), run it: it allocates a deterministic per-worktree port,
+   adopts an already-running server or starts one, and prints `WEB_PORT=<n>`. Use
+   that port for every navigation. Without such a script, discover the actual port
+   (`lsof -nP -iTCP -sTCP:LISTEN`) instead of guessing — and start in the
+   background, waiting for "Ready". Two worktrees never share a port.
 
-2. **List the affected routes.** Be specific — don't screenshot the landing page when you changed a deep route.
+2. **Authenticate if the route is behind login.** Use the project's single
+   local-login recipe (Cravou: `node scripts/dev-login.mjs --print-snippet` → run
+   the JS via Chrome MCP `evaluate_script`, then reload). Do not hand-roll a login
+   or get stuck on the welcome/onboarding screen.
 
-3. **Use Chrome DevTools MCP tools:**
+3. **List the affected routes.** Be specific — don't screenshot the landing page when you changed a deep route.
+
+4. **Use Chrome DevTools MCP tools:**
    Load with `ToolSearch select:new_page,navigate_page,take_screenshot,wait_for,list_pages`
    - `new_page` for the first URL
    - `navigate_page` for subsequent
    - `wait_for` to avoid racing the dev server
    - `take_screenshot` with a `filePath`
+   Only touch pages your session created — `list_pages`/`select_page`/`close_page`
+   on your own targets. NEVER `pkill chrome` / `pkill chrome-devtools-mcp`; that
+   kills other sessions' browsers. The MCP is per-session isolated already.
 
-4. **Save screenshots to `tmp/visual-check/`.** Filename: `{route-slug}--{state}.png`. This folder is gitignored.
+5. **Save screenshots to `tmp/visual-check/`.** Filename: `{route-slug}--{state}.png`. This folder is gitignored.
 
-5. **Read the screenshots with the `Read` tool.** You inspect the images — don't outsource this to the user.
+6. **Read the screenshots with the `Read` tool.** You inspect the images — don't outsource this to the user.
 
-6. **Report what you see.** Confirm expected elements rendered, flag anything off. Fix and re-screenshot if needed.
+7. **Report what you see.** Confirm expected elements rendered, flag anything off. Fix and re-screenshot if needed.
 
 ## What "Verify" Means
 

@@ -36,7 +36,7 @@ Plus `docs/{feature}/milestones/milestone-{n}.md` per slice.
 
 ## Reads
 
-- `.app-catalog/catalog.json` if present — use its names verbatim
+- `.app-catalog/README.md` if present — use its domain/actor names; then load the relevant `.app-catalog/features/{slug}.md` for pages, flows, and gotchas
 - `docs/{feature}/research.md` if present — start from the hot picks
 
 ---
@@ -57,7 +57,7 @@ Use `/grill-me` for these. In `fast` mode, ask only the first three.
 
 ### Section 2 — Product Requirements
 
-Fill in: goal, target users (use catalog actors), in-scope behaviors (use catalog actions), explicit non-goals, success criteria as observable outcomes.
+Fill in: goal, target users (use catalog actors), in-scope behaviors (reference catalog feature flows), explicit non-goals, success criteria as observable outcomes.
 
 **Voice rules:**
 - Take positions. *"We are not doing X"* beats *"X is out of scope for now."*

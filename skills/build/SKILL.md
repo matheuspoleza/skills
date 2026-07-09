@@ -21,7 +21,7 @@ Implement the tasks listed in `docs/{feature}/milestones/milestone-{n}.md`. BDD 
 
 1. `docs/{feature}/prd.md` — feature scope, tech design, milestone list
 2. `docs/{feature}/milestones/milestone-{n}.md` — the tasks in scope (as bullets with BDD criteria below each)
-3. `.app-catalog/catalog.json` — domain vocabulary
+3. `.app-catalog/features/{feature}.md` — pages, flows, vocabulary, gotchas (and `.app-catalog/README.md` for the wider domain/actor map)
 
 If a task bullet has no BDD acceptance criteria, do not start coding — write them first per `rules/bdd.md`.
 
@@ -48,11 +48,12 @@ For each task bullet:
 2. Read the task bullet and its BDD criteria fully
 3. Write BDD criteria if missing (`rules/bdd.md`)
 4. TDD cycle per `rules/tdd.md`: one failing test → minimal code green → refactor. Never batch tests.
-5. Validate end-to-end:
+5. Clean-code self-check before marking done (`rules/clean-code.md`, and `rules/react.md` for any React code): no narrating comments, functions/files within the size signals, no hardcoded styles/colors where a token exists, no duplicate of an existing component, no `useEffect` that should be derived state or a remount `key`. Fix violations now — don't defer.
+6. Validate end-to-end:
    - **Backend / API:** run tests, hit endpoints (curl), verify DB state, confirm typed errors
    - **Frontend / UI:** run tests, then `rules/visual-check.md` (Chrome DevTools MCP, screenshot to `tmp/visual-check/{route}--{state}.png`, read screenshot back)
-6. Fill the Review Contract under the task bullet in the milestone file (test command, endpoints with expected responses, visual routes with screenshot paths, edge cases, known gaps)
-7. Mark **done** (sync three) — tick the checkbox and confirm the Review Contract sub-section is complete
+7. Fill the Review Contract under the task bullet in the milestone file (test command, endpoints with expected responses, visual routes with screenshot paths, edge cases, known gaps)
+8. Mark **done** (sync three) — tick the checkbox and confirm the Review Contract sub-section is complete
 
 Then move to the next task.
 

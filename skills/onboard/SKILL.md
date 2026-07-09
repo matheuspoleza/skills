@@ -1,88 +1,135 @@
 ---
 name: onboard
-description: Map an unfamiliar codebase into a shared domain catalog with visual baseline screenshots, compiled markdown docs, and Gherkin features. Use when starting on a new project, joining an existing codebase, or asked to "map the project", "understand the codebase", or "onboard".
+description: Build a product field guide for an unfamiliar app — one markdown file per feature with pages, flows, screenshots, and the gotchas only a human knows. Use when starting on a new project, joining an existing codebase, or asked to "map the product", "understand what this app does", or "onboard".
 ---
 
 # Onboard
 
-Build a baseline understanding of the project before any feature work. Runs once per project. Skip if `.app-catalog/catalog.json` already exists and is current.
+Capture *product* understanding — what features exist, what users do with them, what they look like, and what the gotchas are. The stuff a fresh agent can't recover from grepping code.
+
+Runs once per project. Skip if `.app-catalog/README.md` already exists and is current; re-run for a single feature only when that feature meaningfully changes.
 
 ---
 
 ## Produces
 
-All output under `.app-catalog/` at the project root:
-
 ```
 .app-catalog/
-├── catalog.json          ← structured domain catalog
-├── screenshots/          ← {domain}-{view}.png
-├── docs/                 ← compiled markdown (overview, per-domain, journeys)
-└── features/             ← compiled Gherkin (one .feature per journey)
+├── README.md              ← domains, actors, feature index
+├── features/
+│   └── {feature-slug}.md  ← one file per feature
+└── screenshots/
+    └── {feature-slug}-{view}.png
 ```
 
-The catalog is the shared vocabulary for all downstream skills. They will use its names verbatim.
+Each `features/{slug}.md` is the atomic unit. Downstream skills load just the relevant feature for the task at hand.
 
 ---
 
 ## Reads
 
-- The codebase itself (routes, mutations, schemas, types, post-mutation chains)
+- The running app (via Chrome DevTools MCP or Jam)
+- The user (interview for purpose, edge cases, gotchas)
 - `package.json` (to detect Agentation)
+- Routes / nav config — only as scaffolding to find pages, not as the catalog itself
 
 ---
 
 ## Steps
 
-### 1. Extract — write `catalog.json`
+### 1. Browse — build a draft
 
-Scan in this order, building the catalog as you go:
+Click through the running app. For each distinct chunk of capability:
+- Note the routes you visit
+- Take a screenshot to `.app-catalog/screenshots/{candidate-slug}-{view}.png`
+- Draft a candidate name and one-sentence purpose
 
-1. Routes + auth patterns → Views + Actors
-2. Mutations, endpoints, form submissions → Actions + Events
-3. Post-mutation chains → Rules (reactions, effects)
-4. Precondition checks → Rules (guards)
-5. Types, schemas, API payloads → Resources
-6. Group by bounded context → Domains
-7. Common action sequences → Journeys
+Use Chrome DevTools MCP or Jam per `rules/visual-check.md`. If the app isn't running, ask the user to start it or fall back to pure interview.
 
-Schema and field-mapping pitfalls live in `schema.md` next to this skill. Read it before writing the catalog.
+End this step with a list of *candidate features* to confirm with the user — names only, no detail yet.
 
-### 2. Compile
+### 2. Interview — confirm each feature
 
-```bash
-app-catalog compile --catalog .app-catalog/catalog.json --output .app-catalog --target markdown
-app-catalog compile --catalog .app-catalog/catalog.json --output .app-catalog --target gherkin
+For each candidate feature, ask one question at a time, with a recommended answer (per the grilling pattern):
+
+1. Is this one feature, or should it be split / merged?
+2. What's its purpose? (one sentence — why does it exist?)
+3. Who uses it? (which actors)
+4. What flows matter? (happy path + 1–2 important edges)
+5. Anything broken, deprecated, or planned I should know? (gotchas)
+
+Skip a question when browsing already gave a confident answer — don't ask just to ask.
+
+### 3. Write — one file per feature
+
+Write `.app-catalog/features/{slug}.md`:
+
+```markdown
+# {Feature Name}
+
+**Domain:** {area-of-product}
+**Actors:** {who uses it}
+**Purpose:** {one sentence}
+
+## Pages
+- `{route}` — {one-line description}
+
+## Flows
+**{Flow name} (happy):** {step → step → step}
+**{Flow name} (edge):** {what goes wrong, what happens}
+
+## Screenshots
+![{view}](../screenshots/{slug}-{view}.png)
+
+## Notes
+- {gotcha, limitation, planned change, product decision}
 ```
 
-### 3. Visual baseline
+Keep it tight. A feature file shouldn't exceed ~50 lines. If it does, the feature is probably two features.
 
-Use Chrome DevTools MCP per `rules/visual-check.md`. For each domain, navigate to its primary view and screenshot to `.app-catalog/screenshots/{domain}-{view}.png`. Capture at minimum: a main dashboard, a key create flow, a key detail view.
+### 4. Index — write README
 
-### 4. Wire Agentation (if applicable)
+Write `.app-catalog/README.md`:
+
+```markdown
+# App Catalog
+
+## Domains
+- **{domain}** — {one-line description}
+
+## Actors
+- **{actor}** — {one-line role}
+
+## Features
+- [{feature name}](features/{slug}.md) — {one-line purpose}
+```
+
+### 5. Wire Agentation (if applicable)
 
 Skip if `agentation` is not in `package.json`. Otherwise:
 
 1. Find the React root: `grep -RIln "createRoot\|ReactDOM.render" src/`
 2. Check if `<Agentation />` is already mounted: `grep -RIln "from .agentation.\|<Agentation" src/`
-3. If not mounted, offer to add the import and a dev-only render: `{process.env.NODE_ENV === "development" && <Agentation />}`
+3. If not mounted, offer to add a dev-only render: `{process.env.NODE_ENV === "development" && <Agentation />}`
 4. Verify MCP connection — `agentation`-prefixed tools should be in the tool list. If not, ask the user to run `npx agentation-mcp doctor` and `init`.
-5. Record `{ "agentation": true }` under a top-level `tooling` block in `catalog.json`.
+5. Add a line `**Agentation:** mounted (dev only)` at the bottom of `README.md`.
 
-### 5. Review
+### 6. Confirm
 
-Summarize: domains, resource count, actor types, key journeys, feature files. Ask the user *"Does this map look right? Anything missing or misnamed?"* Revise the catalog and re-compile on feedback.
+Summarize: domain count, feature count, actor count. Ask: *"Does this map look right? Any feature I missed, named wrong, or split wrong?"* Revise on feedback.
 
 ---
 
 ## NOT
 
-- Does not write PRDs, tech designs, or task breakdowns — those are downstream skills
-- Does not run dev servers or install dependencies — assumes the project already builds
-- Does not modify production code outside the Agentation wiring step (and only with user approval)
+- Does not catalog code-level details (resources, mutations, events, rules) — those are derivable from grep
+- Does not compile to Gherkin or any other format — markdown is the source of truth
+- Does not write PRDs, tech designs, or task breakdowns — downstream skills
+- Does not modify production code outside Agentation wiring (and only with user approval)
+- Does not run dev servers or install dependencies — assumes the project already runs
 
 ---
 
 ## Already done?
 
-If `.app-catalog/catalog.json` exists, read it before any planning session. Use its names everywhere. To update after new features ship: re-run extraction for the affected domains only, then re-compile. Do not regenerate from scratch.
+If `.app-catalog/README.md` exists, read it before any planning session. For task work, load only the relevant `features/{slug}.md`. To update after a feature changes: re-interview for that one feature, rewrite its file, update the README's one-line purpose if it shifted.

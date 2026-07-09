@@ -15,7 +15,7 @@ Context:
 - What I want from you: {grill me through a PRD | research the area first | jump to a tech design}
 
 Before we start, please:
-1. Read `.app-catalog/catalog.json` if it exists — use its names.
+1. Read `.app-catalog/README.md` if it exists — use its names; then load `.app-catalog/features/{slug}.md` for the feature you're working on.
 2. Read `docs/{feature}/` if it exists — pick up where it left off.
 3. If neither exists, ask me what's in scope before assuming.
 

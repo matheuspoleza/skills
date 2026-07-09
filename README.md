@@ -79,6 +79,8 @@ Installed into `.claude/rules/` and referenced from `CLAUDE.md`:
 
 - **tdd.md** — Red → Green → Refactor, one behavior at a time
 - **bdd.md** — Given/When/Then acceptance criteria before code
+- **clean-code.md** — SOLID, complexity/size signals, comments only for *why*
+- **react.md** — Prop-driven data flow, composed hooks, no-useEffect-sync, reusability gates (tokens + existing components)
 - **visual-check.md** — Screenshot and verify UI changes with Chrome DevTools MCP
 - **agentation.md** — Wire and use Agentation for UI feedback when available
 - **scope-first.md** — Define scope before code; log-and-skip on creep
