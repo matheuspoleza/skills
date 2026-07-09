@@ -32,6 +32,7 @@ If any task's Review Contract is incomplete, stop and ask `/build` to complete i
 2. **Endpoints** — run each curl command; compare actual vs expected; test the contract's error cases. Record ✓/✗ with output.
 3. **Visual routes** — for each, navigate with Chrome DevTools MCP, screenshot to `docs/{feature}/reviews/screenshots/{milestone-id}-{slug}.png`, read back, verify content/layout/empty states.
 4. **Edge cases** — verify each listed case.
+5. **Code-quality scan** — review the milestone's diff against `rules/clean-code.md` (and `rules/react.md` for React files): narrating comments, oversized functions/files, hardcoded styles/colors where a token exists, duplicated components, misused `useEffect`. Walk the Fowler smell list in `rules/clean-code.md` and name any that fit the diff (feature envy, data clumps, primitive obsession, repeated switches, message chains, speculative generality…) — naming the smell is what turns it into an actionable fix. Record each hit with `file:line`. Clear violations become fix bullets (see verdicts); judgment calls go in notes.
 
 Verdicts:
 - **passed** — all green
@@ -61,7 +62,18 @@ Only if Phase 1 verdict is `passed` or `passed-with-notes`.
 
 ## Phase 3 — PR description
 
-Write `docs/{feature}/reviews/{milestone-id}-pr.md` using `templates/pr-description.md`. This is the artifact the interviewer sees. Make it precise.
+Write `docs/{feature}/reviews/{milestone-id}-pr.md` using `templates/pr-description.md`, then run it through `/humanizer` before posting.
+
+This is the artifact a teammate reads, so write it like a teammate explaining the change — plain English, outcome-first, short. Calibrated on two canonical PRs: [#12854](https://github.com/jamdotdev/apiofjam/pull/12854) and [#12855](https://github.com/jamdotdev/apiofjam/pull/12855). The non-negotiables (full rules in the template):
+
+- Open with one short prose paragraph on what the change lets us do and why, framed as the capability, not the code. No `short version:` line, no bullets-first.
+- Clean full sentences with normal capitalization — written work, NOT the lowercase Slack register.
+- Name the user-facing command/tool, not internal functions. Keep code identifiers to a minimum.
+- Testing is ONE plain sentence ("Tested end to end against real CF video: ..."). No `- [x]` checklist.
+- No `##` headings, no "Notes for reviewers" section, no pre-existing-error caveats, no Before/After tables, no command-output dumps. If a dependency matters, one plain sentence pointing at the parent PR.
+- No em/en dashes, no emoji, no bold inline-header bullets. Few links: ticket, parent/related PR, spec doc.
+
+Depth (test commands, edge-case tables, code-quality findings, environment caveats) belongs in the review report (`{milestone-id}.md`), never in the PR body.
 
 ---
 

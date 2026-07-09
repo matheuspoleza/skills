@@ -39,8 +39,17 @@ Reading is faster than asking. Reading and *then* confirming what you found is b
 
 ---
 
+## Confirmation gate
+
+When the decision tree is resolved, **do not roll straight into acting on it.** State that grilling is done, summarize the decisions reached in one or two lines, and **wait for the user to confirm** you've reached a shared understanding. Only then hand back to the caller (PRD, build, etc.).
+
+This gate exists because grilling sessions otherwise run to the last question and jump straight into implementation on their own — the user never got to catch a wrong turn. The confirm is cheap; an unwanted implementation is not.
+
+---
+
 ## NOT
 
 - Does not write code
+- Does not enact the plan or start implementation — stops at the confirmation gate and hands back
 - Does not produce the artifact (PRD, design) on its own — it fills in the doc the caller is writing
 - Does not stop at a fixed question count — stops when the decision tree is resolved
